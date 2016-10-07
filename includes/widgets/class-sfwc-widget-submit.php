@@ -126,7 +126,12 @@ class SFWC_Widget_Submit extends WC_Widget {
 				}
 
 				if ( product_tags !== "" ) {
-					form_action += "&product_tags=" + product_tags;
+					// If none of the product categories were selected.
+					if ( product_categories == "" ) {
+						form_action += "?product_tags=" + product_tags;
+					} else {
+						form_action += "&product_tags=" + product_tags;
+					}
 				}
 
 				if ( orderby !== "" ) {
