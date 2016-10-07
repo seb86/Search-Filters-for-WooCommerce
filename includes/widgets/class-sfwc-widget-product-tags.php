@@ -102,34 +102,6 @@ class SFWC_Widget_Product_Tags extends WC_Widget {
 
 		$this->widget_start( $args, $instance );
 
-		echo '<script type="text/javascript">
-		jQuery(document).ready(function(){
-			var product_tags = "";
-
-			jQuery("#sfwc-product-tags").on("change", "input:checkbox", function(){
-
-				jQuery("#sfwc-product-tags input[type=checkbox]:checked").each ( function( index ) {
-
-					if ( index > 0 ) {
-						product_tags += "," + jQuery(this).val();
-					} else {
-						product_tags += jQuery(this).val();
-					}
-
-				});
-
-				// Redirect customer to results
-				/*if ( window.location.href.indexOf("product_categories") > - 1 || window.location.href.indexOf("orderby") > - 1 ) {
-					window.location.replace("' . $form_action . '&product_tags=" + product_tags);
-				} else {
-					window.location.replace("' . $form_action . '?product_tags=" + product_tags);
-				}*/
-			});
-		});
-		</script>';
-
-		echo '<form id="sfwc-product-tags" method="get" name="sfwc-product-tags" action="' . $form_action . '">';
-
 		echo '<ul class="product-tags">';
 
 		$tags = get_terms( $list_args );
@@ -159,7 +131,7 @@ class SFWC_Widget_Product_Tags extends WC_Widget {
 				}
 			}
 
-			$output .= '> ' . esc_html( $tag->name );
+			$output .= '><label for="' . esc_html( $tag->slug ) . '">' . esc_html( $tag->name ) . '</label>';
 
 			if ( $count ) {
 				$output .= ' <span class="count">(' . $tag->count . ')</span>';
@@ -171,13 +143,6 @@ class SFWC_Widget_Product_Tags extends WC_Widget {
 		echo $output;
 
 		echo '</ul>';
-
-		// If product categories was queried we need to keep them when we submit the form again.
-		if ( isset( $_GET['product_categories'] ) ) {
-			echo '<input type="hidden" name="product_categories" value="' . esc_attr( $_GET['product_categories'] ) . '">';
-		}
-
-		echo '</form>';
 
 		$this->widget_end( $args );
 	} // END widget()

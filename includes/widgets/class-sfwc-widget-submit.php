@@ -50,6 +50,8 @@ class SFWC_Widget_Submit extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
+		$fresh_form_action = $form_action; // This is used so we don't have to reset the queried url when we submit again.
+
 		// If product categories was queried we need to keep them when we submit the form again.
 		if ( isset( $_GET['product_categories'] ) ) {
 			$form_action = add_query_arg( 'product_categories', esc_attr( $_GET['product_categories'] ), $form_action );
@@ -75,11 +77,8 @@ class SFWC_Widget_Submit extends WC_Widget {
 			var product_tags = "";
 			var orderby = "' . $orderby . '";
 
-			// Check each product category
-			jQuery("#sfwc-product-categories").on("change", "input:checkbox", function(){
-				product_categories = ""; // Reset
-
-				jQuery("#sfwc-product-categories input[type=checkbox]:checked").each( function( index ) {
+			function load_categories() {
+				jQuery(".product-categories input[type=checkbox]:checked").each( function( index ) {
 
 					if ( index > 0 ) {
 						product_categories += "," + jQuery(this).val();
@@ -88,14 +87,18 @@ class SFWC_Widget_Submit extends WC_Widget {
 					}
 
 				});
+			} // END load_categories()
 
+			load_categories(); // Check for categories already selected first.
+
+			// Check each product category on change.
+			jQuery(".product-categories").on("change", "input:checkbox", function(){
+				product_categories = ""; // Reset product categories
+				load_categories();
 			});
 
-			// Check each product tag
-			jQuery("#sfwc-product-tags").on("change", "input:checkbox", function(){
-				product_tags = ""; // Reset
-
-				jQuery("#sfwc-product-tags input[type=checkbox]:checked").each( function( index ) {
+			function load_tags() {
+				jQuery(".product-tags input[type=checkbox]:checked").each( function( index ) {
 
 					if ( index > 0 ) {
 						product_tags += "," + jQuery(this).val();
@@ -104,28 +107,22 @@ class SFWC_Widget_Submit extends WC_Widget {
 					}
 
 				});
+			} // END load_tags()
 
+			load_tags(); // Check for tags already selected first.
+
+			// Check each product tag on change.
+			jQuery(".product-tags").on("change", "input:checkbox", function(){
+				product_tags = ""; // Reset product tags
+				load_tags();
 			});
 
-			// Search Button
-			jQuery("#sfwc-search").on("click", function(){
-				//e.preventDefault();
+			// Prepare the search query.
+			function prepare_search() {
+				var form_action = "' . $fresh_form_action .'";
 
-				var form_action = "' . $form_action .'";
-
-				// Redirect customer to results
-				if ( window.location.href.indexOf("orderby") > - 1 || window.location.href.indexOf("product_tags") > - 1 ) {
-
-					if ( product_categories !== "" ) {
-						form_action += "&product_categories=" + product_categories;
-					}
-
-				} else {
-
-					if ( product_categories !== "" ) {
-						form_action += "?product_categories=" + product_categories;
-					}
-
+				if ( product_categories !== "" ) {
+					form_action += "?product_categories=" + product_categories;
 				}
 
 				if ( product_tags !== "" ) {
@@ -136,12 +133,22 @@ class SFWC_Widget_Submit extends WC_Widget {
 					form_action += "&orderby=" + orderby;
 				}
 
+				// Redirect customer to results
 				jQuery("#sfwc-search").attr("href", form_action);
+			} // END prepare_search()
+
+			prepare_search(); // Prepare the search button encase the customer has already queried the results once already.
+
+			// Search Button Clicked
+			jQuery("#sfwc-search").on("click", function(){
+				//e.preventDefault();
+
+				prepare_search();
 			});
 		});
 		</script>';
 
-		echo '<a id="sfwc-search" class="button" href="#">' . __( 'Search', 'wcsearchfilters' ) . '</a>';
+		echo '<a id="sfwc-search" class="button default" href="#">' . __( 'Search', 'wcsearchfilters' ) . '</a>';
 		echo '<a id="sfwc-reset" class="button alt" href="' . wc_get_page_permalink( 'shop' ) . '">' . __( 'Reset', 'wcsearchfilters' ) . '</a>';
 
 		$this->widget_end( $args );
