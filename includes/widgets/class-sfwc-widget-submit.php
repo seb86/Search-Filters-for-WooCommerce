@@ -2,7 +2,7 @@
 /**
  * Product Search Widget.
  *
- * @author   SÃ©bastien Dumont
+ * @author   Sébastien Dumont
  * @category Widgets
  * @package  Search Filters for WooCommerce/Widgets
  * @version  1.0.0
@@ -119,7 +119,7 @@ class SFWC_Widget_Submit extends WC_Widget {
 
 			// Prepare the search query.
 			function prepare_search() {
-				var form_action = "' . $fresh_form_action .'";
+				var form_action = "' . $fresh_form_action . '";
 
 				if ( product_categories !== "" ) {
 					form_action += "?product_categories=" + product_categories;
@@ -154,7 +154,7 @@ class SFWC_Widget_Submit extends WC_Widget {
 		</script>';
 
 		echo '<a id="sfwc-search" class="button default" href="#">' . __( 'Search', 'wcsearchfilters' ) . '</a>';
-		echo '<a id="sfwc-reset" class="button alt" href="' . wc_get_page_permalink( 'shop' ) . '">' . __( 'Reset', 'wcsearchfilters' ) . '</a>';
+		echo '<a id="sfwc-reset" class="button alt" href="' . $fresh_form_action . '">' . __( 'Reset', 'wcsearchfilters' ) . '</a>';
 
 		$this->widget_end( $args );
 	}
