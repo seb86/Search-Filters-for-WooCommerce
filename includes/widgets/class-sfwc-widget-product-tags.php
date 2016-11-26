@@ -45,11 +45,16 @@ class SFWC_Widget_Product_Tags extends WC_Widget {
 					'name'  => __( 'Name', 'wcsearchfilters' ),
 				),
 			),
-			/*'dropdown' => array(
-				'type'  => 'multiselect',
-				'std'   => '',
-				'label' => __( 'Allowed Tags', 'wcsearchfilters' ),
-				'options' => array(),
+			'only_tags'  => array(
+				'type'        => 'text',
+				'std'         => '',
+				'label'       => __( 'Tags to Include', 'wcsearchfilters' ),
+				'description' => __( 'Enter the tag separated by `,`. If left empty, all product tags will show.'),
+			),
+			/*'only_tags' => array(
+				'type'        => 'multiselect_tags',
+				'std'         => '',
+				'label'       => __( 'Tags to Include', 'wcsearchfilters' ),
 				'description' => __( 'If left empty, all product tags will show.'),
 			),*/
 			'count' => array(
@@ -63,6 +68,8 @@ class SFWC_Widget_Product_Tags extends WC_Widget {
 				'label' => __( 'Hide empty tags', 'wcsearchfilters' ),
 			),
 		);
+
+		add_action( 'woocommerce_widget_field_multiselect_tags', array( $this, 'widget_form_multiselect_product_tags_field' ), 10, 4 );
 
 		parent::__construct();
 	}
@@ -79,7 +86,9 @@ class SFWC_Widget_Product_Tags extends WC_Widget {
 		$count      = isset( $instance['count'] ) ? $instance['count'] : $this->settings['count']['std'];
 		$orderby    = isset( $instance['orderby'] ) ? $instance['orderby'] : $this->settings['orderby']['std'];
 		$hide_empty = isset( $instance['hide_empty'] ) ? $instance['hide_empty'] : $this->settings['hide_empty']['std'];
-		$list_args  = array( 'show_count' => $count, 'taxonomy' => 'product_tag', 'orderby' => $orderby, 'hide_empty' => $hide_empty );
+		$only_tags  = isset( $instance['only_tags'] ) ? $instance['only_tags'] : $this->settings['only_tags']['std'];
+		//$only_tags  = !empty( $instance['only_tags'] ) ? $instance['only_tags'] : '';
+		$list_args  = array( 'show_count' => $count, 'taxonomy' => 'product_tag', 'orderby' => $orderby, 'hide_empty' => $hide_empty, 'include' => $only_tags );
 
 		// Setup Current Tags
 		$this->current_tags = false;
@@ -105,8 +114,6 @@ class SFWC_Widget_Product_Tags extends WC_Widget {
 		echo '<ul class="product-tags">';
 
 		$tags = get_terms( $list_args );
-
-		//unset( $tags[0] ); // Removes the "All" tag.
 
 		$output = '';
 
@@ -146,5 +153,39 @@ class SFWC_Widget_Product_Tags extends WC_Widget {
 
 		$this->widget_end( $args );
 	} // END widget()
+
+
+	/**
+	 * Creates a multiselect field to list the product tags to select.
+	 *
+	 * @access public
+	 * @param  $key
+	 * @param  $value
+	 * @param  $setting
+	 * @param  $instance
+	 */
+	public function widget_form_multiselect_product_tags_field( $key, $value, $setting, $instance ) {
+		$class = isset( $setting['class'] ) ? $setting['class'] : '';
+
+		$the_terms = get_terms( 'product_tag', array(
+			'hide_empty' => false,
+		) );
+
+		$term_options = NULL;
+
+		foreach( $the_terms as $term_key => $term_value ) {
+			$term_options[] = array( 'name' => $term_value->name, 'value' => $term_value->term_id );
+		}
+		?>
+		<p>
+			<label for="<?php echo $this->get_field_id( $key ); ?>"><?php echo $setting['label']; ?></label>
+			<select class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo $this->get_field_name( $key ); ?>" multiple>
+				<?php foreach ( $term_options as $option_key => $option_value ) { ?>
+					<option value="<?php echo esc_attr( $option_value['value'] ); ?>" <?php selected( $option_value['value'], $value ); ?>><?php echo esc_html( $option_value['name'] ); ?></option>
+				<?php } ?>
+			</select>
+		</p>
+	<?php
+	} // END widget_form_multiselect_product_tags_field()
 
 }

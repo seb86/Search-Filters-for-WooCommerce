@@ -29,7 +29,7 @@ include_once( dirname( __FILE__ ) . '/widgets/class-sfwc-widget-submit.php' );
  */
 function sfwc_register_widgets() {
 	register_widget( 'SFWC_Widget_Product_Categories' );
-  register_widget( 'SFWC_Widget_Product_Tags' );
+	register_widget( 'SFWC_Widget_Product_Tags' );
 	register_widget( 'SFWC_Widget_Price_Filter' );
 	register_widget( 'SFWC_Widget_Submit' );
 }
